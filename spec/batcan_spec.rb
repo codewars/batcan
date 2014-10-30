@@ -12,17 +12,26 @@ end
 class Team
   include Batcan::Permissible
 
+  # for join, we don't allow :a role, and defer to default_can? for everything else
   permission :join do |team, user|
     "a role is not allowed to join" if user.role == :a
   end
 
+  # for invite we don't allow :a role, but allow anything else
   permission :invite do |team, user|
-    next "a role is not allowed to invite" if user.role == :a
-    true
+    user.role == :a ? "a role is not allowed to invite" : true
   end
 
   permission :add, :members do |team, user|
-    next 'a role cannot invite members' if user.role == :a
+    'a role cannot invite members' if user.role == :a
+  end
+
+  permission :create do |team, user|
+    user.role == :b
+  end
+
+  def new_record?
+    true
   end
 end
 
@@ -81,5 +90,16 @@ describe User do
       end
     end
 
+    context "normalize actions" do
+      it 'should normalize save to create' do
+        expect(b_role.can?(:save, team)).to eq true
+        expect(a_role.can?(:save, team)).to eq false
+      end
+
+      it 'should normalize set to create' do
+        expect(b_role.can?(:set, team)).to eq true
+        expect(a_role.can?(:set, team)).to eq false
+      end
+    end
   end
 end

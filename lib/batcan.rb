@@ -3,9 +3,14 @@ require "batcan/version"
 require 'batcan/permissible'
 require 'batcan/canable'
 require 'batcan/can_result'
+require 'batcan/storable'
 
 module Batcan
+
   class PolicyError < RuntimeError
+  end
+
+  class CurrentUserNotSetError < PolicyError
   end
 
   class PermitError < PolicyError

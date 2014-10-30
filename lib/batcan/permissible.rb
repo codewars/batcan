@@ -43,15 +43,17 @@ module Batcan
 
       action = self.class.normalize_action_name(action)
 
-      # naturally you cant delete something that doesnt exist
-      return false if action == :delete and new_record?
+      if respond_to?(:new_record?)
+        # naturally you cant delete something that doesnt exist
+        return false if action == :delete and new_record?
 
-      # also you can't create something that already exists
-      return false if action == :create and not new_record?
+        # also you can't create something that already exists
+        return false if action == :create and not new_record?
 
-      # save actions get mapped to either create or update depending on the state of the object
-      if action == :save
-        action = new_record? ? :create : :update
+        # save actions get mapped to either create or update depending on the state of the object
+        if action == :save
+          action = new_record? ? :create : :update
+        end
       end
 
       permission = permission_for(action, options)
@@ -71,13 +73,11 @@ module Batcan
             permitted = permission.call(self, user, options) if permission
 
           when :create, :update, :add, :remove, :clear
-            options[:field_only] = !!options[:fields]
             if respond_to?(:new_record?)
+              options[:field_only] = !!options[:fields]
               permission = permission_for(new_record? ? :create : :update)
-            else
-              permission = permission_for(:save)
+              permitted = permission.call(self, user, options) if permission
             end
-            permitted = permission.call(self, user, options) if permission
         end
       end
 
@@ -105,6 +105,7 @@ module Batcan
         @permissions ||= {has_field_permissions: false}
       end
 
+      # returns true if any field permissions have been defined the model
       def has_field_permissions?
         permissions[:has_field_permissions]
       end
@@ -137,7 +138,7 @@ module Batcan
           field.each do |f|
             permission(action, f, &block)
           end
-        elsif action == :save
+        elsif action == :save and method_defined?(:respond_to?)
           permission([:create, :update], field, &block)
         else
           config = permissions[action] ||= {}

@@ -48,6 +48,39 @@ user.can!(:join, team) # raises an error
 
 ```
 
+## Storage
+
+There is a Batcan::Storage module that can be utilized along with activerecord/mongoid and the sentient_user gems to provide
+secure persistance methods at the model layer. For example:
+
+```ruby
+class User
+    include Mongoid
+    include SentientUser
+    include Batcan::Canable
+
+    field :role
+end
+
+class Team
+    include Mongoid
+    include Batcan::Permissible
+    include Batcan::Storable
+
+    field :name
+
+    # allow admin users to create/update teams
+    permission :save do |team, user|
+        user.role == :admin
+    end
+end
+
+user = User.first.make_current
+team = Team.first
+team.name = 'foo'
+team.store! # will raise an error if user is not an admin
+```
+
 
 ## Installation
 
