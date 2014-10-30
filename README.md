@@ -1,6 +1,53 @@
 # Batcan
 
-TODO: Write a gem description
+## Usage Example
+
+```ruby
+# simple example user. You can use PORO if you want.
+
+User = Struct.new(:role) do
+  include Batcan::Canable
+
+  # the default ability if a more specific one is not defined
+  def default_can?(action, target, options = {})
+    !!role # by default if a user has any role than they are permitted
+  end
+end
+
+class Team
+  include Batcan::Permissible
+
+  def members
+    @members ||= []
+  end
+
+  permission :join do |team, user|
+    # returning a string is like returning false (not allowed) but with a reason
+    "guest role is not allowed to join" if user.role == :guest
+    # if nil is returned then default_can? value will be used
+  end
+
+  permission :delete do |team, user|
+    # only admins are allowed, everyone else will be dissollowed
+    user.role == :admin
+  end
+
+  # field level permissions
+  permission :add, :members do |team, user|
+    # allow members to be added if the user is a member
+    team.members.include? user
+  end
+end
+
+user = User.new(:admin)
+team = Team.new
+
+user.can?(:join, team) # returns true
+user.role = :guest
+user.can!(:join, team) # raises an error
+
+```
+
 
 ## Installation
 
