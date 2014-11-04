@@ -55,7 +55,9 @@ module Batcan
     def store
       assert_current_user
       if user_can?(:save)
-        save
+        run_callbacks :store do
+          save
+        end
       else
         false
       end
@@ -68,6 +70,25 @@ module Batcan
       user_can!(:save)
       run_callbacks :store do
         save!
+      end
+    end
+
+    def store_attributes(attrs)
+      assert_current_user
+      if user_can?(:update)
+        run_callbacks :store do
+          update_attributes(attrs)
+        end
+      else
+        false
+      end
+    end
+
+    def store_attributes!(attrs)
+      assert_current_user
+      user_can!(:update)
+      run_callbacks :store do
+        update_attributes!(attrs)
       end
     end
 

@@ -1,5 +1,4 @@
 require 'spec_helper'
-require './lib/batcan'
 require 'sentient_user'
 require 'active_model'
 
@@ -29,6 +28,7 @@ class Team
   def destroyed?()  false end
   def save()        true  end
   def save!()             end
+  def update_attributes!(h)end
   def destroy()     true  end
   def destroy!()          end
 
@@ -99,6 +99,29 @@ describe Batcan::Storable do
 
       it 'should raise error' do
         expect { team.store! }.to raise_error
+      end
+    end
+  end
+
+  describe '#store_attributes!' do
+    context 'when :b role' do
+      before { b_user.make_current }
+
+      it 'should not raise error' do
+        team.store_attributes!(name: 'a')
+      end
+
+      it 'should call update_attributes!' do
+        expect(team).to receive :update_attributes!
+        team.store_attributes!(name: 'a')
+      end
+    end
+
+    context 'when :a role' do
+      before { a_user.make_current }
+
+      it 'should raise error' do
+        expect { team.store_attributes!(name: 'a') }.to raise_error
       end
     end
   end

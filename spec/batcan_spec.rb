@@ -1,5 +1,4 @@
 require 'spec_helper'
-require './lib/batcan'
 
 User = Struct.new(:role) do
   include Batcan::Canable
