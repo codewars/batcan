@@ -90,7 +90,7 @@ module Batcan
       def recursive_find(klass, action, options)
         config = klass.permissions[action]
         permission = config[options[:field] || '_'] if config
-        if !permission && self.class.superclass.respond_to?(:permissions)
+        if !permission && klass.superclass.respond_to?(:permissions)
           recursive_find(klass.superclass, action, options)
         else
           permission
