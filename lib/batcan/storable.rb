@@ -27,6 +27,7 @@ module Batcan
     # value into the errors collection if user is unable to perform the action.
     # Usage: foo.user_can?(:save)
     def user_can?(action, options = {})
+      options = {field: options} if options.is_a? Symbol
       result = user_can(action, options)
 
       unless result.ok?
