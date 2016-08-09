@@ -10,13 +10,24 @@ end
 class Team
   extend ActiveModel::Naming
   include ActiveSupport::Callbacks
+  include ActiveModel::Dirty
   include Batcan::Permissible
   include Batcan::Storable
 
   attr_reader :errors
 
+  define_attribute_methods :secret
+
+  attr_reader :secret
+
   def initialize
+    @secret = nil
     @errors = ActiveModel::Errors.new(self)
+  end
+
+  def secret=(val)
+    secret_will_change! unless @secret == val
+    @secret = val
   end
 
   def to_model
@@ -33,13 +44,18 @@ class Team
   def destroy!()          end
 
   permission [:save, :destroy] do |team, user|
-    user.role == :b
+    user.role == :b or user.role == :admin
+  end
+
+  permission :save, :secret do |team, user|
+    user.role == :admin
   end
 end
 
 describe Batcan::Storable do
   let(:a_user) { User.new(:a) }
   let(:b_user) { User.new(:b) }
+  let(:admin_user) { User.new(:admin) }
   let(:team) { Team.new }
 
   describe 'store' do
@@ -78,6 +94,26 @@ describe Batcan::Storable do
         team.store
       end
     end
+
+    context 'when saving the secret' do
+      before { team.secret = 'blue' }
+
+      context 'when :b role' do
+        before { b_user.make_current }
+
+        it 'should return false' do
+          expect(team.store).to eq false
+        end
+      end
+
+      context 'when :a role' do
+        before { admin_user.make_current }
+
+        it 'should return true' do
+          expect(team.store).to eq true
+        end
+      end
+    end
   end
 
   describe '#store!' do
@@ -101,6 +137,26 @@ describe Batcan::Storable do
         expect { team.store! }.to raise_error
       end
     end
+
+    context 'when saving the secret' do
+      before { team.secret = 'blue' }
+
+      context 'when :b role' do
+        before { b_user.make_current }
+
+        it 'should return false' do
+          expect { team.store! }.to raise_error
+        end
+      end
+
+      context 'when :a role' do
+        before { admin_user.make_current }
+
+        it 'should return true' do
+          expect { team.store! }.to_not raise_error
+        end
+      end
+    end
   end
 
   describe '#store_attributes!' do
@@ -122,6 +178,24 @@ describe Batcan::Storable do
 
       it 'should raise error' do
         expect { team.store_attributes!(name: 'a') }.to raise_error
+      end
+    end
+
+    context 'when saving the secret' do
+      context 'when :b role' do
+        before { b_user.make_current }
+
+        it 'should return false' do
+          expect { team.store_attributes!(secret: 'blue') }.to raise_error
+        end
+      end
+
+      context 'when :a role' do
+        before { admin_user.make_current }
+
+        it 'should return true' do
+          expect { team.store_attributes!(secret: 'blue') }.to_not raise_error
+        end
       end
     end
   end
