@@ -5,7 +5,7 @@ module Batcan
 
     def can!(action, target = self, options = {})
       result = can(action, target, options)
-      raise PermitError.new(result, action) unless result.ok?
+      raise PermitError.new(result, action, target) unless result.ok?
       true
     end
 

@@ -112,16 +112,10 @@ module Batcan
 
       def normalize_action_name(action)
         case action
-          when :set
-            :save
-
-          when :get
-            :view
-
-          when :delete
-            :destroy
-          else
-            action
+          when :set then :save
+          when :get then :view
+          when :delete then :destroy
+          else action
         end
       end
 

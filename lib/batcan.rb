@@ -16,10 +16,15 @@ module Batcan
   class PermitError < PolicyError
     attr_reader :details, :action
 
-    def initialize(result, action = nil)
+    def initialize(result, action = nil, target = nil)
       @details = result
       @action = action
+      @target = target
+      
       msg = "User is not permitted to #{action ? action : 'perform this action'}"
+      if target
+        msg += " on #{target.class.name}"
+      end
       msg += ": #{result.message}" if result.message
       super(msg)
     end
