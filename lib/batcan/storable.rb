@@ -1,7 +1,4 @@
 module Batcan
-
-
-
   # this module is meant to be included within an active model. It provides the ability
   # to call save or destroy with special store and trash varients, which take into account
   # user security.

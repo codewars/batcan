@@ -1,11 +1,6 @@
 require 'spec_helper'
-require 'sentient_user'
 require 'active_model'
-
-User = Struct.new(:role) do
-  include Batcan::Canable
-  include SentientUser
-end
+require_relative 'user'
 
 class Team
   extend ActiveModel::Naming

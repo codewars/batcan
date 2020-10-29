@@ -45,10 +45,10 @@ module Batcan
 
       if respond_to?(:new_record?)
         # naturally you cant delete something that doesnt exist
-        return false if action == :delete and new_record?
+        return 'nothing to delete' if action == :delete and new_record?
 
         # also you can't create something that already exists
-        return false if action == :create and not new_record?
+        return 'already created' if action == :create and not new_record?
 
         # save actions get mapped to either create or update depending on the state of the object
         if action == :save
