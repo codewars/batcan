@@ -73,7 +73,7 @@ module Batcan
 
     def store_attributes(attrs)
       assert_current_user
-      if user_can?(:update)
+      if user_can?(:update, :fields => attrs.keys)
         run_callbacks :store do
           update_attributes(attrs)
         end
@@ -84,7 +84,7 @@ module Batcan
 
     def store_attributes!(attrs)
       assert_current_user
-      user_can!(:update)
+      user_can!(:update, :fields => attrs.keys)
       run_callbacks :store do
         update_attributes!(attrs)
       end
