@@ -19,7 +19,6 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "activesupport"
   spec.add_development_dependency "sentient_user"
-  spec.add_development_dependency "bundler", "~> 1.6"
   spec.add_development_dependency "rake"
   spec.add_development_dependency "rspec"
 end
